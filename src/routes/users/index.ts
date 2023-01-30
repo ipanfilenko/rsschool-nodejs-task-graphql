@@ -80,9 +80,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           return reply.status(400).send({ status: 400, message: 'Invalid user id' });
         }
 
-        await this.db.users.delete({ key: 'id', equals: id });
+        const deletedUser = await this.db.users.delete(id);
 
-        return reply.status(200).send(user);
+        return reply.status(200).send(deletedUser);
       } catch {
         return reply.status(400).send({ status: 400, message: 'Internel server error' });
       }

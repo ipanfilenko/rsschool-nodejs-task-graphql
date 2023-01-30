@@ -29,7 +29,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         if (!profile) {
           return reply.status(404).send({ status: 404, message: 'Profile is not found' });
         }
-        console.log('getProfile', profile);
+
         return reply.status(200).send(profile);
 
       } catch {

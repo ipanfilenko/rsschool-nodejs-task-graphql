@@ -82,6 +82,26 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 
         const deletedUser = await this.db.users.delete(id);
 
+        const profile = await this.db.profiles.findOne({ key: 'userId', equals: deletedUser.id })
+
+        if (profile) {
+          await this.db.profiles.delete(profile.id);
+        }
+
+        const posts = await this.db.posts.findMany({ key: 'userId', equals: deletedUser.id });
+
+        posts.forEach(async (post) => await this.db.posts.delete(post.id));
+
+        const allUsers = await this.db.users.findMany();
+
+        allUsers.forEach(async (user) => {
+          if(user.subscribedToUserIds.includes(deletedUser.id)) {
+            const newSubscriptions = user.subscribedToUserIds.filter((_id) => _id !== deletedUser.id);
+            const updatedUser = { ...user, subscribedToUserIds: newSubscriptions };
+            await this.db.users.change(user.id, updatedUser);
+          }
+        });
+
         return reply.status(200).send(deletedUser);
       } catch {
         return reply.status(400).send({ status: 400, message: 'Internel server error' });
